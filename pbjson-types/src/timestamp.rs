@@ -23,6 +23,28 @@ impl From<Timestamp> for time::OffsetDateTime {
     }
 }
 
+impl From<std::time::SystemTime> for Timestamp {
+    fn from(system_time: std::time::SystemTime) -> Timestamp {
+        let (seconds, nanos) = match system_time.duration_since(std::time::UNIX_EPOCH) {
+            Ok(duration) => {
+                let seconds = i64::try_from(duration.as_secs()).unwrap();
+                (seconds, duration.subsec_nanos() as i32)
+            }
+            Err(error) => {
+                let duration = error.duration();
+                let seconds = i64::try_from(duration.as_secs()).unwrap();
+                let nanos = duration.subsec_nanos() as i32;
+                if nanos == 0 {
+                    (-seconds, 0)
+                } else {
+                    (-seconds - 1, 1_000_000_000 - nanos)
+                }
+            }
+        };
+        Timestamp { seconds, nanos }
+    }
+}
+
 impl Serialize for Timestamp {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
