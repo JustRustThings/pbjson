@@ -22,6 +22,7 @@ pub mod private {
     /// Re-export base64
     pub use base64;
 
+    use base64::Engine;
     use serde::de::Visitor;
     use serde::Deserialize;
     use std::borrow::Cow;
@@ -69,7 +70,8 @@ pub mod private {
         where
             E: serde::de::Error,
         {
-            let decoded = base64::decode_config(s, base64::STANDARD)
+            let decoded = base64::engine::general_purpose::STANDARD
+                .decode(s)
                 .or_else(|e| match e {
                     // Either standard or URL-safe base64 encoding are accepted
                     //
@@ -78,7 +80,7 @@ pub mod private {
                     // Therefore if we error out on those characters, try again with
                     // the URL-safe character set
                     base64::DecodeError::InvalidByte(_, c) if c == b'-' || c == b'_' => {
-                        base64::decode_config(s, base64::URL_SAFE)
+                        base64::engine::general_purpose::URL_SAFE.decode(s)
                     }
                     _ => Err(e),
                 })
