@@ -12,7 +12,6 @@ exclude = ["protos/*"]
 
 [dependencies] # In alphabetical order
 bytes = "1.0"
-chrono = { version = "0.4", default-features = false, features = ["alloc"] }
 pbjson = { path = "../pbjson", version = "0.7" }
 prost = "0.13"
 serde = { version = "1.0", features = ["derive"] }
