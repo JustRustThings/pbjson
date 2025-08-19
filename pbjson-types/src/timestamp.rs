@@ -82,18 +82,6 @@ impl<'de> serde::Deserialize<'de> for Timestamp {
     }
 }
 
-#[allow(clippy::derived_hash_with_manual_eq)] // Derived logic is correct: comparing the 2 fields for equality
-impl std::hash::Hash for Timestamp {
-    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        self.seconds.hash(state);
-        self.nanos.hash(state);
-    }
-}
-
-/// Implements the unstable/naive version of `Eq`: a basic equality check on the internal fields of the `Timestamp`.
-/// This implies that `normalized_ts != non_normalized_ts` even if `normalized_ts == non_normalized_ts.normalized()`.
-impl Eq for Timestamp {}
-
 #[cfg(test)]
 mod tests {
     use super::*;
