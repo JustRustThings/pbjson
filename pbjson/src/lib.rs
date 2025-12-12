@@ -103,13 +103,19 @@ pub mod private {
 
     impl<'de, T> Deserialize<'de> for BytesDeserialize<T>
     where
-        T: From<Vec<u8>>,
+        T: TryFrom<Vec<u8>>,
+        <T as TryFrom<Vec<u8>>>::Error: std::fmt::Display,
     {
         fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
         where
             D: serde::Deserializer<'de>,
         {
-            Ok(Self(deserializer.deserialize_str(Base64Visitor)?.into()))
+            Ok(Self(
+                deserializer
+                    .deserialize_str(Base64Visitor)?
+                    .try_into()
+                    .map_err(serde::de::Error::custom)?,
+            ))
         }
     }
 
